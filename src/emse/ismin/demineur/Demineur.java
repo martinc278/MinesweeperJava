@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 /**
  *
  */
-public class Demineur extends JFrame {
+public class Demineur extends JFrame implements Runnable{
     public static final String HOSTNAME = "localhost";
     public static final String PSEUDO = "Gros Bill";
     public static final int PORT = 10000;
@@ -24,6 +24,14 @@ public class Demineur extends JFrame {
     private boolean lost;
     private int nbCasesDecouvertes = 0;
     private static final String FILENAME = "score.dat";
+    public static final int MSG = 0;
+    public static final int POS = 1;
+    public static final int START = 2;
+    public static final int END = 3;
+
+    DataOutputStream out;
+    DataInputStream in;
+    Thread process;
 
     public int getNbCasesDecouvertes() {
         return nbCasesDecouvertes;
@@ -119,10 +127,18 @@ public class Demineur extends JFrame {
 
     public void connect2server(String host, String port, String pseudo) {
         int port_int = Integer.parseInt(port);
-        gui.addMsg("Trying to connect to :"+host+" : "+port_int);
+        gui.addMsg("\nTrying to connect to :"+host+" : "+port_int);
         try{
             Socket sock = new Socket(host, port_int);
             gui.addMsg("\nConnexion OK");
+
+            process = new Thread(this);
+            process.start();
+
+            in = new DataInputStream(sock.getInputStream());
+            out =new DataOutputStream(sock.getOutputStream());
+            out.writeUTF(pseudo);
+
         } catch(UnknownHostException e){
             gui.addMsg("\nConnexion impossible");
             e.printStackTrace();
@@ -131,6 +147,28 @@ public class Demineur extends JFrame {
             gui.addMsg("\nConnexion impossible");
             e.printStackTrace();
         }
+    }
+
+    public void run(){
+        //boucle infinie
+        while(process !=null){
+            try{
+                int cmd = in.readInt();
+                if(cmd==MSG){ //en fct de ce que je lis : j'affiche les mines/numéros/fin de partie
+                    String msg = in.readUTF();
+                    gui.addMsg(msg);
+                } else if(cmd==POS){
+
+                }
+            } catch(IOException e){
+                e.printStackTrace();
+            }
+
+        }
+
+        //lecture dans in : lecture de la commande et lecture du joueur qui a cliqué en x;y
+
+
     }
 
     /*private void savScores() {

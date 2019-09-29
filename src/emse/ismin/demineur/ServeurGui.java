@@ -27,6 +27,6 @@ public class ServeurGui extends JPanel {
      * @param ch texte à afficher
      */
     public void addMsg(String ch){
-        msAreas.append(ch);
+        msAreas.append(ch+"\n");
     }
 }

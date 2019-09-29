@@ -1,11 +1,13 @@
 package emse.ismin.demineur;
 
 import javax.swing.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Serveur extends JFrame{
+public class Serveur extends JFrame implements Runnable{
 
     ServeurGui guiServer;
     Socket socket;
@@ -42,11 +44,42 @@ public class Serveur extends JFrame{
     public void startServeur() {
         guiServer.addMsg("Attente des clients");
         try{
+            //Lancement du gestionnaire de sockets
             gestSock = new ServerSocket(Demineur.PORT);
-            socket = gestSock.accept();
+
+            //On lance les threads pour attendre le client
+            new Thread(this).start();
+
         } catch(IOException e){
             e.printStackTrace();
         }
+    }
+
+    public void run(){
+        try {
+            socket = gestSock.accept(); //new client
+            guiServer.addMsg("Nouveau client");
+
+            //lancement du client suivant
+            new Thread(this).start();
+
+            //ouverture des in/out
+            DataOutputStream out =new DataOutputStream(socket.getOutputStream());
+            DataInputStream in = new DataInputStream(socket.getInputStream());
+
+            //stockage dans 2 collections
+
+            //boucle infinie d'attente des infos des clients
+            String joueur = in.readUTF();
+            guiServer.addMsg(joueur);
+
+            //redispach aux autres si nécessaire
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     /***
