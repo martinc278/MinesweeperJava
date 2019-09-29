@@ -6,12 +6,18 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public class Serveur extends JFrame implements Runnable{
 
     ServeurGui guiServer;
     Socket socket;
     ServerSocket gestSock;
+    private HashMap<String, DataOutputStream> listOut = new HashMap<>();
+    private HashMap<String, DataInputStream> listIn = new HashMap();
+
     /***
      *
      */
@@ -67,11 +73,18 @@ public class Serveur extends JFrame implements Runnable{
             DataOutputStream out =new DataOutputStream(socket.getOutputStream());
             DataInputStream in = new DataInputStream(socket.getInputStream());
 
-            //stockage dans 2 collections
-
-            //boucle infinie d'attente des infos des clients
+            //boucle  d'attente des infos des clients
             String joueur = in.readUTF();
             guiServer.addMsg(joueur);
+
+            //stockage dans 2 collections
+            listOut.put(joueur, out);
+            listIn.put(joueur, in);
+
+            //Boucle infinie d'attente des instructions joueur
+            while(true){
+                String instruction = in.readUTF();
+            }
 
             //redispach aux autres si nécessaire
 
@@ -93,5 +106,18 @@ public class Serveur extends JFrame implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void startPartie() {
+        try {
+            gestSock.close();
+            guiServer.addMsg("Server Closed, game can start");
+            for(Map.Entry<String, DataOutputStream> i : listOut.entrySet()){
+                i.getValue().writeInt(2); //return le out pour chacune des entrées
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

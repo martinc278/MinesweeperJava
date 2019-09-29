@@ -20,7 +20,7 @@ public class Gui extends JPanel implements ActionListener {
     private JTextField pseudoField = new JTextField(Demineur.PSEUDO, 15);
     private JTextField portField = new JTextField(String.valueOf(Demineur.PORT), 15);
     private JButton connexionBut = new JButton("Connect");
-    private JTextArea msgArea = new JTextArea("Bienvenue");
+    private JTextArea msgArea = new JTextArea("Bienvenue", 20, 20);
 
     //Ajout du pannel
 

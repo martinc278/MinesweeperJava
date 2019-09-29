@@ -133,11 +133,12 @@ public class Demineur extends JFrame implements Runnable{
             gui.addMsg("\nConnexion OK");
 
             process = new Thread(this);
-            process.start();
 
             in = new DataInputStream(sock.getInputStream());
             out =new DataOutputStream(sock.getOutputStream());
             out.writeUTF(pseudo);
+
+            process.start();
 
         } catch(UnknownHostException e){
             gui.addMsg("\nConnexion impossible");
@@ -154,11 +155,9 @@ public class Demineur extends JFrame implements Runnable{
         while(process !=null){
             try{
                 int cmd = in.readInt();
-                if(cmd==MSG){ //en fct de ce que je lis : j'affiche les mines/numéros/fin de partie
-                    String msg = in.readUTF();
-                    gui.addMsg(msg);
+                if(cmd==START){ //en fct de ce que je lis : j'affiche les mines/numéros/fin de partie
+                    gui.addMsg("La partie peut commencer");
                 } else if(cmd==POS){
-
                 }
             } catch(IOException e){
                 e.printStackTrace();

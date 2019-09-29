@@ -3,9 +3,11 @@ package emse.ismin.demineur;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.ServerSocket;
 
-public class ServeurGui extends JPanel {
+public class ServeurGui extends JPanel implements ActionListener {
 
     private JButton startBut = new JButton("Start Partie");
     private Serveur serveur;
@@ -20,6 +22,8 @@ public class ServeurGui extends JPanel {
         add(msAreas, BorderLayout.CENTER);
         add(startBut, BorderLayout.SOUTH);
 
+        startBut.addActionListener(this);
+
     }
 
     /***
@@ -28,5 +32,11 @@ public class ServeurGui extends JPanel {
      */
     public void addMsg(String ch){
         msAreas.append(ch+"\n");
+    }
+
+    public void actionPerformed(ActionEvent actionEvent) {
+        if (actionEvent.getSource() == startBut) {
+            serveur.startPartie();
+        }
     }
 }

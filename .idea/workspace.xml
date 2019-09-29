@@ -43,8 +43,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.Demineur">
-    <configuration name="Demineur" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Application.Serveur">
+    <configuration name="Demineur" type="Application" factoryName="Application" singleton="false" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="emse.ismin.demineur.Demineur" />
       <module name="Projet_Rendu" />
       <extension name="coverage">
@@ -57,7 +57,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Serveur" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+    <configuration name="Serveur" type="Application" factoryName="Application" singleton="false" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="emse.ismin.demineur.Serveur" />
       <module name="Projet_Rendu" />
       <extension name="coverage">
@@ -70,10 +70,14 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Application.Demineur" />
+      <item itemvalue="Application.Serveur" />
+    </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.Demineur" />
         <item itemvalue="Application.Serveur" />
+        <item itemvalue="Application.Demineur" />
       </list>
     </recent_temporary>
   </component>
@@ -100,6 +104,7 @@
       <workItem from="1569413228180" duration="9020000" />
       <workItem from="1569423200206" duration="35000" />
       <workItem from="1569424009545" duration="3916000" />
+      <workItem from="1569757032797" duration="6218000" />
     </task>
     <servers />
   </component>
@@ -111,7 +116,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
