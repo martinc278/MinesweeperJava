@@ -12,7 +12,7 @@ import java.io.IOException;
 public class Case extends JPanel implements MouseListener {
     private final static int DIM=50 ;
     String txt = "X";
-    private int x,y;
+    private int x,y, nb_vois;
     private Demineur demin;
     private boolean click =false;
 
@@ -28,12 +28,12 @@ public class Case extends JPanel implements MouseListener {
     public void paintComponent(Graphics gc){
         //super.paintComponent(gc); // appel méthode mère (efface le dessin précedent)
         //gc.drawString(txt, 10,10); // dessin du texte à la position 10, 10
-        gc.setColor(Color.gray); // cyan
+        gc.setColor(Color.gray); // gris
         gc.fillRect(1,1, getWidth(), getHeight());
 
-        if(click){
+        if((!demin.getConnected()&&click) || (demin.getConnected())){
             super.paintComponent(gc);
-                if (demin.getChamp().isMIN(x, y)) {
+                if ((!demin.getConnected()&&demin.getChamp().isMIN(x, y)) || (demin.getConnected()&&demin.getBombeConnected())) {
                     BufferedImage image;
                     try {
                         image = ImageIO.read(new File("img/bombe.png"));
@@ -43,7 +43,15 @@ public class Case extends JPanel implements MouseListener {
                     }
                 } else {
                     gc.setColor(new Color(0, 150, 136));
-                    int nb_vois = demin.getChamp().nbVoisins(x, y);
+                    if(demin.getConnected()){
+                        nb_vois = demin.getNBVoisConnected();
+                        //gc.setColor(demin.getColorConnected());
+                        setBackground(demin.getColorConnected());
+                        gc.setFont(new Font("default", Font.BOLD, 16));
+
+                    } else{
+                        nb_vois = demin.getChamp().nbVoisins(x, y);
+                    }
                     gc.drawString(String.valueOf(nb_vois), getWidth() / 2, getHeight() / 2);
                 }
             /*gc.setColor(Color.black); // cyan
@@ -59,27 +67,38 @@ public class Case extends JPanel implements MouseListener {
         }
 
         click =true;
-        if(!demin.getLost()) {
-            //demarrage de la partie
-            if (!demin.isStarted()) {
-                demin.getGui().getCompteur().startCpt();
-                demin.setStarted(true);
-                demin.setLost(false);
-            }
-            repaint();
+        if(!demin.getConnected()) {
+            if (!demin.getLost()) {
+                //demarrage de la partie
+                if (!demin.isStarted()) {
+                    demin.getGui().getCompteur().startCpt();
+                    demin.setStarted(true);
+                    demin.setLost(false);
+                }
+                repaint();
 
-            //tombe sur une mine
-            if(demin.getChamp().isMIN(x,y)){
+                //tombe sur une mine
+                if (demin.getChamp().isMIN(x, y)) {
+                    demin.getGui().getCompteur().stopCpt();
+                    JOptionPane.showMessageDialog(null, "You loose !!!");
+                    demin.setLost(true);
+                } else {
+                }
+            }
+            //Si j'ai gagné
+            if (demin.isWin()) {
                 demin.getGui().getCompteur().stopCpt();
-                JOptionPane.showMessageDialog(null, "You loose !!!");
-                demin.setLost(true);
-            } else {
+                JOptionPane.showMessageDialog(null, "You WIN \n Score : " + demin.getGui().getCompteur().getVal());
             }
         }
-        //Si j'ai gagné
-        if(demin.isWin()){
-            demin.getGui().getCompteur().stopCpt();
-            JOptionPane.showMessageDialog(null, "You WIN \n Score : "+demin.getGui().getCompteur().getVal());
+        if(demin.getConnected() && !demin.getLost()){
+            try {
+                demin.out.writeInt(8);
+                demin.out.writeInt(this.x);
+                demin.out.writeInt(this.y);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

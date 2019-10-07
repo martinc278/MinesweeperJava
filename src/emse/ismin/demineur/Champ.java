@@ -16,6 +16,7 @@ public class Champ {
      * Initilisation du tableau
      */
     private boolean [][] tabMines; //il faut faire le new mtn dans les constructeurs parce que ça va bouger selon les constructeur
+    private String [][] tabConnected;
     int dim;
     int nbmines;
     private static int NBMINES_EASY = 5;
@@ -45,12 +46,41 @@ public class Champ {
         tabMines = new boolean[x][y];
     }
 
+    /***
+     * Initialisation du tableau de cases pour garder la trace qui a cliqué sur quoi
+     * @param x dimension x du champ
+     * @param y dimension y du champ
+     */
+    private void init_table_connected(int x, int y){
+        tabConnected = new String[x][y];
+        for(int i=0; i<x; i++){
+            for(int j=0; j<y; j++){
+                tabConnected[i][j]="unclicked";
+            }
+        }
+    }
+
+    /***
+     * Renvoie qui a clické sur la case x,y en mode réseau, si personne n'a clické : "unclicked"
+     * @param x ligne de la case à vérifier
+     * @param y colonne de la case à vérifier
+     * @return always un string
+     */
+    public String getTableConnected(int x, int y){
+        return tabConnected[x][y];
+    }
+
+    public void setTableConnected(int x, int y, String nom){
+        tabConnected[x][y] = nom;
+    }
+
     /**
      * Constructeur sans paramètres
      */
     public Champ() {
         nbmines = 5;
         init_table(5,5);
+        init_table_connected(5,5);
     }
 
     /**
@@ -67,6 +97,7 @@ public class Champ {
      */
     public Champ(int x,int y){
         init_table(x,y);
+        init_table_connected(x,y);
         nbmines = NBMINES_CUSTOM;
     }
 
@@ -95,6 +126,9 @@ public class Champ {
         }
     }
 
+    /***
+     * Fonction d'affichage dans le terminal du champ qu'on a
+     */
     void afficherMines() {
         for (int i=0; i<tabMines.length; i++) {
             for (int j = 0; j < tabMines[0].length; j++)
@@ -127,6 +161,12 @@ public class Champ {
         return count;
     }
 
+    /***
+     * Renvoie si il y a une mine à la position x,y
+     * @param x ligne de la position à vérifier
+     * @param y colonne de la position à vérifier
+     * @return si il y a une bombe ou pas
+     */
     boolean isMIN(int x, int y){
         return(tabMines[x][y]);
     }
@@ -148,26 +188,41 @@ public class Champ {
         return "";
     }
 
+    /***
+     * Dimension du tableau de mines
+     * @return Dimension du tableau de mines
+     */
     public int getDimX(){
         return tabMines.length;
     }
 
+    /***
+     * Dimension du tableau de mines
+     * @return Dimension du tableau de mines
+     */
     public int getDimY(){
         return tabMines[0].length;
     }
 
+    /***
+     * Fonction appelée par le constructeur de champ pour construire un nouveau champ et aussi pour faire une nouvelle partie en mode solo
+     * @param level level de la partie qu'on veut effectuer
+     */
     public void newPartie(Level level){
         if(level==Level.EASY){
             this.nbmines = NBMINES_EASY;
             init_table(3,3);
+            init_table_connected(3,3);
         }
         if(level==Level.MEDUIM){
             nbmines = NBMINES_MEDIUM;
-            init_table(20,20);
+            init_table(5,5);
+            init_table_connected(20,20);
         }
         if(level==Level.HARD){
             nbmines = NBMINES_HARD;
             init_table(30,30);
+            init_table_connected(30,30);
         }
         //afficherMines();
     }

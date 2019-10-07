@@ -1,15 +1,12 @@
 package emse.ismin.demineur;
 
-import javax.management.openmbean.InvalidOpenTypeException;
 import javax.swing.*;
+import java.awt.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  *
@@ -18,7 +15,7 @@ public class Demineur extends JFrame implements Runnable{
     public static final String HOSTNAME = "localhost";
     public static final String PSEUDO = "Gros Bill";
     public static final int PORT = 10000;
-    private Champ ch = new Champ(Level.EASY);
+    private Champ ch = new Champ(Level.MEDUIM);
     private boolean started = false;
     private Gui gui; //création de l'interface graphique
     private boolean lost;
@@ -28,6 +25,45 @@ public class Demineur extends JFrame implements Runnable{
     public static final int POS = 1;
     public static final int START = 2;
     public static final int END = 3;
+    public static final int START_CPT = 4;
+    public static final int SET_LOST_FALSE = 5;
+    public static final int IS_MINES = 6;
+    public static final int IS_NOT_MINE = 7;
+    public static final int COORDONNEES = 8;
+    public static final int IS_CLICKED = 9;
+
+
+
+    private boolean connected = false;
+    private boolean bombeConnected = false;
+    private int NBVoisConnected = 0;
+    private Color colorConnected;
+
+    public String getJoueurClicked() {
+        return joueurClicked;
+    }
+
+    public void setJoueurClicked(String joueurClicked) {
+        this.joueurClicked = joueurClicked;
+    }
+
+    private String joueurClicked;
+
+    /***
+     * Getter de connected
+     * @return
+     */
+    public boolean getConnected() {
+        return connected;
+    }
+
+    /***
+     * Setter de connected
+     * @param connected
+     */
+    public void setConnected(boolean connected) {
+        this.connected = connected;
+    }
 
     DataOutputStream out;
     DataInputStream in;
@@ -131,6 +167,8 @@ public class Demineur extends JFrame implements Runnable{
         try{
             Socket sock = new Socket(host, port_int);
             gui.addMsg("\nConnexion OK");
+            setConnected(true);
+            setLost(false);
 
             process = new Thread(this);
 
@@ -156,8 +194,32 @@ public class Demineur extends JFrame implements Runnable{
             try{
                 int cmd = in.readInt();
                 if(cmd==START){ //en fct de ce que je lis : j'affiche les mines/numéros/fin de partie
-                    gui.addMsg("La partie peut commencer");
+                    gui.addMsg("\nLa partie peut commencer");
                 } else if(cmd==POS){
+                } else if(cmd==START_CPT){
+                    this.getGui().getCompteur().startCpt();
+                } else if(cmd== SET_LOST_FALSE){
+                    setLost(false);
+                } else if(cmd==IS_MINES){
+                    setBombeConnected(true);
+                    int x = in.readInt();
+                    int y = in.readInt();
+                    getGui().getTabCases()[x][y].repaint();
+                    setLost(true);
+                    gui.addMsg("\nClick sur Bombe");
+                    JOptionPane.showMessageDialog(null, "You loose !!!");
+                } else if(cmd==IS_NOT_MINE){
+                    int x = in.readInt();
+                    int y = in.readInt();
+                    int nbVoisin = in.readInt();
+                    setNBVoisConnected(nbVoisin);
+                    String joueurClick = in.readUTF();
+                    setJoueurClicked(joueurClick);
+                    setColorConnected(in.readInt());
+                    gui.addMsg("\nClick sur regular case par "+getJoueurClicked());
+                    getGui().getTabCases()[x][y].repaint();
+                } else if(cmd==IS_CLICKED){
+                    gui.addMsg("\nLa case a déjà été cliquée par " + in.readUTF());
                 }
             } catch(IOException e){
                 e.printStackTrace();
@@ -168,6 +230,34 @@ public class Demineur extends JFrame implements Runnable{
         //lecture dans in : lecture de la commande et lecture du joueur qui a cliqué en x;y
 
 
+    }
+
+    public void setColorConnected(int readInt) {
+        this.colorConnected = new Color(readInt);
+    }
+
+    public Color getColorConnected(){
+        return this.colorConnected;
+    }
+
+    private void setBombeConnected(boolean b) {
+        this.bombeConnected = true;
+    }
+
+    /***
+     * Renvoie true si il y a une bombe sur la case là où on a cliqué en mode client/server
+     * @return
+     */
+    public boolean getBombeConnected() {
+        return this.bombeConnected;
+    }
+
+    public int getNBVoisConnected() {
+        return this.NBVoisConnected;
+    }
+
+    public void setNBVoisConnected(int NBVoisConnected) {
+        this.NBVoisConnected = NBVoisConnected;
     }
 
     /*private void savScores() {

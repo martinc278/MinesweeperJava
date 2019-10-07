@@ -28,14 +28,30 @@ public class Gui extends JPanel implements ActionListener {
 
     Demineur demin;
 
+    /***
+     * Getter de compteur - utilisé en local
+     * @return
+     */
     public Compteur getCompteur() {
         return compteur;
+    }
+
+    /***
+     * Getter du tableau de cases
+     * @return tableau de cases de la taille du champ
+     */
+    public Case[][] getTabCases() {
+        return tabCases;
     }
 
     private Case[][] tabCases;
 
     JPanel pannelMines = new JPanel();
 
+    /***
+     * On crée le GUI du démineur dans les cas de réseau ou non, et on lui donne en paramètre le démineur dont il découle
+     * @param demin démineur dont le GUI découle
+     */
     Gui(Demineur demin){
        this.demin = demin;
 
@@ -123,14 +139,17 @@ public class Gui extends JPanel implements ActionListener {
         else if(actionEvent.getSource()==mEasy){
             demin.getChamp().newPartie(Level.EASY);
             newPartie(Level.EASY);
+            demin.setConnected(false);
         }
         else if(actionEvent.getSource()==mMedium){
             demin.getChamp().newPartie(Level.MEDUIM);
             newPartie(Level.MEDUIM);
+            demin.setConnected(false);
         }
         else if(actionEvent.getSource()==mHard){
             demin.getChamp().newPartie(Level.HARD);
             newPartie(Level.HARD);
+            demin.setConnected(false);
         }
 
         else if(actionEvent.getSource()==connexionBut){
@@ -169,6 +188,9 @@ public class Gui extends JPanel implements ActionListener {
         demin.pack();
     }
 
+    /***
+     * Place les case dans le GUI dans le JPannel du milieu (pannelMines)
+     */
     private void placeCases(){
         demin.setNbCasesDecouvertes(0);
         pannelMines.setLayout(new GridLayout(demin.getChamp().getDimX(),demin.getChamp().getDimY()));
@@ -181,6 +203,10 @@ public class Gui extends JPanel implements ActionListener {
         }
     }
 
+    /***
+     * Méthode d'affichage utilisé du côté client en réseau pour afficher dans la chatbox
+     * @param s string à afficher
+     */
     public void addMsg(String s) {
         msgArea.append(s);
     }
