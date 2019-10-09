@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class Serveur extends JFrame implements Runnable{
+public class Serveur extends JFrame implements Runnable {
 
     ServeurGui guiServer;
     Socket socket;
@@ -21,9 +21,10 @@ public class Serveur extends JFrame implements Runnable{
     private HashMap<DataOutputStream, Color> listColor = new HashMap<>();
 
     private Champ ch = new Champ(Level.MEDUIM); //champ crée par le serveur
-
+    private int nbCasesDecouvertes_connected = 0;
     public static final int START = 2;
     private boolean gameStarted = false;
+    public static final int WON = 3;
     public static final int START_CPT = 4;
     private static final int SET_LOST_FALSE = 5;
     private static final int IS_MINES = 6;
@@ -39,29 +40,47 @@ public class Serveur extends JFrame implements Runnable{
         this.gameStarted = gameStarted;
     }
 
+
+    /***
+     * getter de nombre de cases découvertes, en mode connected
+     * @return le nbre de cases découvertes en mode connected
+     */
+    public int getNbCasesDecouvertes_connected() {
+        return nbCasesDecouvertes_connected;
+    }
+
+    /***
+     * Setter de nombre de cases découvertes, en mode connecté
+     * @param nbCasesDecouvertes_connected nbre auquel on veut set le nombre de cases connectées
+     */
+    public void setNbCasesDecouvertes_connected(int nbCasesDecouvertes_connected) {
+        this.nbCasesDecouvertes_connected = nbCasesDecouvertes_connected;
+    }
+
+
     /***
      * Constructeur de serveur
      */
-    Serveur(){
+    Serveur() {
         System.out.println("Démarrage du server");
-            //On crée l'interface graphique liée au serveur
-            guiServer = new ServeurGui(this);
+        //On crée l'interface graphique liée au serveur
+        guiServer = new ServeurGui(this);
 
-            //On affiche tout ce qui est lié au server
-            setContentPane(guiServer);
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
-            pack();
-            setVisible(true);
+        //On affiche tout ce qui est lié au server
+        setContentPane(guiServer);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        pack();
+        setVisible(true);
 
-            startServeur();
-            //stopServeur();
+        startServeur();
+        //stopServeur();
     }
 
     /***
      * Main de serveur, lance le constructeur
      * @param arg classic main
      */
-    public static void main(String[] arg){
+    public static void main(String[] arg) {
         new Serveur();
     }
 
@@ -70,14 +89,14 @@ public class Serveur extends JFrame implements Runnable{
      */
     public void startServeur() {
         guiServer.addMsg("Attente des clients");
-        try{
+        try {
             //Lancement du gestionnaire de sockets
             gestSock = new ServerSocket(Demineur.PORT);
 
             //On lance les threads pour attendre le client
             new Thread(this).start();
 
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -85,7 +104,7 @@ public class Serveur extends JFrame implements Runnable{
     /***
      * Thread de gestion des clients, un Thread par client et toujours un en plus qui attend les nouveaux clients
      */
-    public void run(){
+    public void run() {
         try {
             socket = gestSock.accept(); //new client
             guiServer.addMsg("Nouveau client");
@@ -94,7 +113,7 @@ public class Serveur extends JFrame implements Runnable{
             new Thread(this).start();
 
             //ouverture des in/out
-            DataOutputStream out =new DataOutputStream(socket.getOutputStream());
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             DataInputStream in = new DataInputStream(socket.getInputStream());
 
             //boucle  d'attente des infos des clients
@@ -104,19 +123,19 @@ public class Serveur extends JFrame implements Runnable{
             //stockage dans 2 collections
             listOut.put(joueur, out);
             listIn.put(joueur, in);
-            Random random= new Random();
-            Random random1= new Random();
-            Random random2= new Random();
+            Random random = new Random();
+            Random random1 = new Random();
+            Random random2 = new Random();
             listColor.put(out, new Color(random.nextInt(256), random1.nextInt(256), random2.nextInt(256)));
 
             //Boucle infinie d'attente des instructions joueur
-            while(true){
+            while (true) {
                 int instruction = in.readInt();
-                if(instruction==COORDONNEES){
+                if (instruction == COORDONNEES) {
                     int x = in.readInt();
                     int y = in.readInt();
-                    guiServer.addMsg("\nCoordonnée reçues : x="+String.valueOf(x)+" y="+String.valueOf(y));
-                    verifMines(x,y, out);
+                    guiServer.addMsg("\nCoordonnée reçues : x=" + String.valueOf(x) + " y=" + String.valueOf(y));
+                    verifMines(x, y, out);
                 }
             }
 
@@ -137,33 +156,41 @@ public class Serveur extends JFrame implements Runnable{
      */
     synchronized private void verifMines(int x, int y, DataOutputStream out) {
         try {
-            if(ch.getTableConnected(x,y)=="unclicked"){ //Cas de bombe
-                if(ch.isMIN(x,y)){
-                    for(Map.Entry<String, DataOutputStream> i : listOut.entrySet()){ //On Parcours toute la collection pour dire à tout le monde qu'il y a une bombe découverte par qqn
-                        ch.setTableConnected(x,y,nomJoueurConnected(out));
+            if (ch.getTableConnected(x, y) == "unclicked"){
+                setNbCasesDecouvertes_connected(getNbCasesDecouvertes_connected()+1);
+                if (ch.isMIN(x, y)) {
+                    for (Map.Entry<String, DataOutputStream> i : listOut.entrySet()) { //On Parcours toute la collection pour dire à tout le monde qu'il y a une bombe découverte par qqn
+                        ch.setTableConnected(x, y, nomJoueurConnected(out));
                         i.getValue().writeInt(IS_MINES); //return le out pour chacune des entrées et envoie que la partie peut commencer
                         i.getValue().writeInt(x);
                         i.getValue().writeInt(y);
-                    }
-                }
-                else{ //cas de non bombe
-                    for(Map.Entry<String, DataOutputStream> i : listOut.entrySet()){ //On Parcours toute la collection pour que tout le monde voit le nombre de voisins
-                        ch.setTableConnected(x,y,nomJoueurConnected(out));
-                        i.getValue().writeInt(IS_NOT_MINE); //On envoie à tous les clients que (x,y) n'est pas une mine et le nombre de voisins
-                        i.getValue().writeInt(x);
-                        i.getValue().writeInt(y);
-                        i.getValue().writeInt(ch.nbVoisins(x,y));
                         i.getValue().writeUTF(nomJoueurConnected(out));
-                        i.getValue().writeInt(colorJoueurConnected(out).getRGB());
                     }
+                } else { //cas de non bombe
+                    if(isWinConnected()){ //On regarde si on a gagné et si oui on dit à tout le monde que c'est le cas
+                        for (Map.Entry<String, DataOutputStream> i : listOut.entrySet()) { //On Parcours toute la collection pour que tout le monde voit le nombre de voisins
+                            i.getValue().writeInt(WON);
+                            i.getValue().writeUTF(nomJoueurConnected(out));
+                        }
+                    } else{ //Si personne n'a gagné encore
+                        for (Map.Entry<String, DataOutputStream> i : listOut.entrySet()) { //On Parcours toute la collection pour que tout le monde voit le nombre de voisins
+                            ch.setTableConnected(x, y, nomJoueurConnected(out));
+                            i.getValue().writeInt(IS_NOT_MINE); //On envoie à tous les clients que (x,y) n'est pas une mine et le nombre de voisins
+                            i.getValue().writeInt(x);
+                            i.getValue().writeInt(y);
+                            i.getValue().writeInt(ch.nbVoisins(x, y));
+                            i.getValue().writeUTF(nomJoueurConnected(out));
+                            i.getValue().writeInt(colorJoueurConnected(out).getRGB());
+                        }
+                    }
+
                 }
             }else{ //Si qqn a déjà cliqué sur la case, on dit qui
-                out.writeInt(IS_CLICKED); //return le out pour chacune des entrées et envoie que la partie peut commencer
-                out.writeUTF(ch.getTableConnected(x,y));
+            out.writeInt(IS_CLICKED); //return le out pour chacune des entrées et envoie que la partie peut commencer
+            out.writeUTF(ch.getTableConnected(x, y));
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch(IOException e) {
+        e.printStackTrace();
         }
     }
 
@@ -213,7 +240,7 @@ public class Serveur extends JFrame implements Runnable{
      */
     public void startPartie() {
         try {
-            gestSock.close();
+            //gestSock.close();
             guiServer.addMsg("Server Closed, game can start");
             setGameStarted(true);
             for(Map.Entry<String, DataOutputStream> i : listOut.entrySet()){ //On Parcours toute la collection
@@ -223,10 +250,16 @@ public class Serveur extends JFrame implements Runnable{
 
             ch.placeMines();
             ch.afficherMines();
+            guiServer.addMsg("\nNb de mines : "+ch.getNbmines());
+            setNbCasesDecouvertes_connected(0); //On remets à 0 le nombre de cases découvertes
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private boolean isWinConnected(){
+        return getNbCasesDecouvertes_connected()+ch.getNbmines()==ch.getDimX()*ch.getDimY();
     }
 }

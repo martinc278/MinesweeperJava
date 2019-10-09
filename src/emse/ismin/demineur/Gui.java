@@ -179,6 +179,7 @@ public class Gui extends JPanel implements ActionListener {
      */
     private void newPartie(Level level){
         //Rémarrage du compteur
+        demin.setWonConnected(false);
         getCompteur().stopCpt();
         demin.setNbCasesDecouvertes(0);
         demin.setStarted(false);

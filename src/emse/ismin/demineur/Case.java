@@ -31,7 +31,7 @@ public class Case extends JPanel implements MouseListener {
         gc.setColor(Color.gray); // gris
         gc.fillRect(1,1, getWidth(), getHeight());
 
-        if((!demin.getConnected()&&click) || (demin.getConnected())){
+        if((!demin.getConnected()&&click) || (demin.getConnected()&&!demin.isWonConnected())){
             super.paintComponent(gc);
                 if ((!demin.getConnected()&&demin.getChamp().isMIN(x, y)) || (demin.getConnected()&&demin.getBombeConnected())) {
                     BufferedImage image;

@@ -24,7 +24,7 @@ public class Demineur extends JFrame implements Runnable{
     public static final int MSG = 0;
     public static final int POS = 1;
     public static final int START = 2;
-    public static final int END = 3;
+    public static final int WON = 3;
     public static final int START_CPT = 4;
     public static final int SET_LOST_FALSE = 5;
     public static final int IS_MINES = 6;
@@ -36,18 +36,43 @@ public class Demineur extends JFrame implements Runnable{
 
     private boolean connected = false;
     private boolean bombeConnected = false;
+    private boolean wonConnected = false;
     private int NBVoisConnected = 0;
     private Color colorConnected;
+    private String joueurClicked;
 
+    /***
+     * getter de JoueurClicked, permet de savoir qui a cliqué, en mode connecté
+     * @return string du joueur qui a cliqué
+     */
     public String getJoueurClicked() {
         return joueurClicked;
     }
 
+    /***
+     *Setter du joueur qui a cliqué
+     * @param joueurClicked string du joueur qui a cliqué sur la case
+     */
     public void setJoueurClicked(String joueurClicked) {
         this.joueurClicked = joueurClicked;
     }
 
-    private String joueurClicked;
+    /***
+     * getter de wonConnected, permet de savoir si la partie a été gagnée déjà
+     * @return la booléen qui donne l'état de la partie, won ou non
+     */
+    public boolean isWonConnected() {
+        return wonConnected;
+    }
+
+    /***
+     * setter de wonConnected, permet de set si la partie a été gagnée ou non
+     * @param wonConnected indiquer le changement d'état sur la partie
+     */
+    public void setWonConnected(boolean wonConnected) {
+        this.wonConnected = wonConnected;
+    }
+
 
     /***
      * Getter de connected
@@ -109,7 +134,7 @@ public class Demineur extends JFrame implements Runnable{
     public Gui getGui(){return this.gui;}
 
     /**
-     * Construction de tout
+     * Construction de tout - constructeur de la classe, appelé par le main
      */
     public Demineur() {
         super("Démineur");
@@ -144,10 +169,18 @@ public class Demineur extends JFrame implements Runnable{
         System.exit(0);
     }
 
+    /***
+     * Getter de champ, utilisé pour passer dans le GUI le plus souvent
+     * @return
+     */
     public Champ getChamp(){
         return ch;
     }
 
+    /***
+     * Fonction qui permet de savoir si toutes les cases qui ne contenaient pas de cases ont été cliquées
+     * @return le booléen sur l'état de la partie, gangée ou pas
+     */
     public boolean isWin() {
         /*System.out.println("nb cases decouvertes "+ nbCasesDecouvertes);
         System.out.println("nb mines "+ ch.getNbmines());
@@ -161,6 +194,12 @@ public class Demineur extends JFrame implements Runnable{
         }*/
     }
 
+    /***
+     * Fonction appelée par le bouton qui connect au serveur, les paramètre sont donnés dans le
+     * @param host ip du serveur donné par le GUI
+     * @param port port donné par le GUI
+     * @param pseudo pseudo du joueur donné par le GUI
+     */
     public void connect2server(String host, String port, String pseudo) {
         int port_int = Integer.parseInt(port);
         gui.addMsg("\nTrying to connect to :"+host+" : "+port_int);
@@ -188,6 +227,9 @@ public class Demineur extends JFrame implements Runnable{
         }
     }
 
+    /***
+     * process d'écoute de ce qui vient du serveur, tourne toujours
+     */
     public void run(){
         //boucle infinie
         while(process !=null){
@@ -200,14 +242,14 @@ public class Demineur extends JFrame implements Runnable{
                     this.getGui().getCompteur().startCpt();
                 } else if(cmd== SET_LOST_FALSE){
                     setLost(false);
-                } else if(cmd==IS_MINES){
+                } else if(cmd==IS_MINES && !isWonConnected()){
                     setBombeConnected(true);
                     int x = in.readInt();
                     int y = in.readInt();
                     getGui().getTabCases()[x][y].repaint();
                     setLost(true);
                     gui.addMsg("\nClick sur Bombe");
-                    JOptionPane.showMessageDialog(null, "You loose !!!");
+                    JOptionPane.showMessageDialog(null, "La partie a été perdue par "+in.readUTF());
                 } else if(cmd==IS_NOT_MINE){
                     int x = in.readInt();
                     int y = in.readInt();
@@ -220,6 +262,9 @@ public class Demineur extends JFrame implements Runnable{
                     getGui().getTabCases()[x][y].repaint();
                 } else if(cmd==IS_CLICKED){
                     gui.addMsg("\nLa case a déjà été cliquée par " + in.readUTF());
+                } else if(cmd==WON){
+                    JOptionPane.showMessageDialog(null, "La partie a été gagnée par "+in.readUTF());
+                    setWonConnected(true);
                 }
             } catch(IOException e){
                 e.printStackTrace();
@@ -232,14 +277,26 @@ public class Demineur extends JFrame implements Runnable{
 
     }
 
+    /***
+     *setter de la couleur du joueur en mode connecté
+     * @param readInt couleur codé sur un int
+     */
     public void setColorConnected(int readInt) {
         this.colorConnected = new Color(readInt);
     }
 
+    /***
+     * Getter de la couleur d'un joueur en mode connecté,
+     * @return la couleur d'un joueur en mode connecté
+     */
     public Color getColorConnected(){
         return this.colorConnected;
     }
 
+    /***
+     * Indique s'il y a une bombe en mode connecté
+     * @param b booléen de changement
+     */
     private void setBombeConnected(boolean b) {
         this.bombeConnected = true;
     }
@@ -252,10 +309,18 @@ public class Demineur extends JFrame implements Runnable{
         return this.bombeConnected;
     }
 
+    /***
+     * Donne le nombre de voisins autour, en mode connecté
+     * @return entier, nd de voisins
+     */
     public int getNBVoisConnected() {
         return this.NBVoisConnected;
     }
 
+    /***
+     * Setter de l'attribut nombre de voisins
+     * @param NBVoisConnected set le nombre de voisins (int)
+     */
     public void setNBVoisConnected(int NBVoisConnected) {
         this.NBVoisConnected = NBVoisConnected;
     }
