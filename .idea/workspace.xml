@@ -43,7 +43,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.Demineur">
+  <component name="RunManager" selected="Application.Serveur">
     <configuration name="Demineur" type="Application" factoryName="Application" singleton="false" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="emse.ismin.demineur.Demineur" />
       <module name="Projet_Rendu" />
@@ -76,8 +76,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.Demineur" />
         <item itemvalue="Application.Serveur" />
+        <item itemvalue="Application.Demineur" />
       </list>
     </recent_temporary>
   </component>
@@ -109,6 +109,7 @@
       <workItem from="1570015051163" duration="15487000" />
       <workItem from="1570045385275" duration="225000" />
       <workItem from="1570102872834" duration="6935000" />
+      <workItem from="1570534074689" duration="92000" />
     </task>
     <servers />
   </component>
