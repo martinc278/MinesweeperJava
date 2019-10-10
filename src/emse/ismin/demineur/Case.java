@@ -68,12 +68,13 @@ public class Case extends JPanel implements MouseListener {
 
         click =true;
         if(!demin.getConnected()) {
-            if (!demin.getLost()) {
+            if (!demin.getLost()&&!demin.getWin()) {
                 //demarrage de la partie
                 if (!demin.isStarted()) {
                     demin.getGui().getCompteur().startCpt();
                     demin.setStarted(true);
                     demin.setLost(false);
+                    demin.setWin(false);
                 }
                 repaint();
 
@@ -86,7 +87,8 @@ public class Case extends JPanel implements MouseListener {
                 }
             }
             //Si j'ai gagné
-            if (demin.isWin()) {
+            if (demin.isWin()&&!demin.getWin()) {
+                demin.setWin(true);
                 demin.getGui().getCompteur().stopCpt();
                 JOptionPane.showMessageDialog(null, "You WIN \n Score : " + demin.getGui().getCompteur().getVal());
             }

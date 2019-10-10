@@ -19,6 +19,7 @@ public class Demineur extends JFrame implements Runnable{
     private boolean started = false;
     private Gui gui; //création de l'interface graphique
     private boolean lost;
+    private boolean win;
     private int nbCasesDecouvertes = 0;
     private static final String FILENAME = "score.dat";
     public static final int MSG = 0;
@@ -118,6 +119,18 @@ public class Demineur extends JFrame implements Runnable{
     public void setLost(boolean lost) {
         this.lost = lost;
     }
+
+    /***
+     * getter de win, si on gagne la partie
+     * @return le boolean qui donne l'état de la partie
+     */
+    public boolean getWin(){return this.win;}
+
+    /***
+     * Setter de win, état de la partie, gagnée ou non
+     * @param win set l'état de la partie, boolean
+     */
+    public void setWin(boolean win){this.win = win;}
 
     /***
      *

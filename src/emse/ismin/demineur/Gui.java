@@ -165,6 +165,7 @@ public class Gui extends JPanel implements ActionListener {
         getCompteur().stopCpt();
         demin.setStarted(false);
         demin.setLost(false);
+        demin.setWin(false);
 
         for(int i=0; i<demin.getChamp().getDimX(); i++){
             for(int j=0; j<demin.getChamp().getDimY(); j++){
